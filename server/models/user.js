@@ -11,6 +11,7 @@ const UserSchema = new mongoose.Schema({
   email: {
     type: String,
     required: true,
+    unique: true,
   },
   dob: {
     type: Date,
@@ -23,31 +24,50 @@ const UserSchema = new mongoose.Schema({
   isAdmin: {
     type: Boolean,
     required: true,
+    default: false,
   },
   photoUrl: {
     type: String,
-    required: true,
+    required: false,
   },
-  hash: String,
-  salt: String,
+  hash:{
+    type: String,
+    required: true
+  },
+  salt: {
+    type: String,
+    required: true
+  }
 });
 
-// Method to set salt and hash the password for a user
-UserSchema.methods.setPassword = function (password) {
-  // Creating a  unique salt for a particular user
-  this.salt = crypto.randomBytes(16).toString("hex");
+// // Method to set salt and hash the password for a user
+// UserSchema.methods.setPassword = function (password) {
+//   // Creating a  unique salt for a particular user
+//   this.salt = crypto.randomBytes(16).toString("hex");
 
-  // Hashing user's salt and password with 1000 iterations
-  this.hash = crypto
-    .pbkdf2Sync(password, this.salt, 1000, 64, `sha512`)
-    .toString(`hex`);
+//   // Hashing user's salt and password with 1000 iterations
+//   this.hash = crypto
+//     .pbkdf2Sync(password, this.salt, 1000, 64, `sha512`)
+//     .toString(`hex`);
+// };
+
+// // Method to check whether the entered password is correct or not
+// UserSchema.methods.isValidPassword = function (password) {
+//   const hash = crypto
+//     .pbkdf2Sync(password, this.salt, 1000, 64, `sha512`)
+//     .toString(`hex`);
+//   return this.hash === hash;
+// };
+
+// Method to set salt and hash the password
+UserSchema.methods.setPassword = function (password) {
+  this.salt = crypto.randomBytes(16).toString("hex");
+  this.hash = crypto.pbkdf2Sync(password, this.salt, 1000, 64, `sha512`).toString(`hex`);
 };
 
-// Method to check whether the entered password is correct or not
+// Method to check password validity
 UserSchema.methods.isValidPassword = function (password) {
-  const hash = crypto
-    .pbkdf2Sync(password, this.salt, 1000, 64, `sha512`)
-    .toString(`hex`);
+  const hash = crypto.pbkdf2Sync(password, this.salt, 1000, 64, `sha512`).toString(`hex`);
   return this.hash === hash;
 };
 

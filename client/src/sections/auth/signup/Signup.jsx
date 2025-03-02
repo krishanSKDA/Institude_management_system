@@ -43,18 +43,23 @@ export default function SignUpPage() {
     if (name === "" || email === "" || password === "") {
       toast.error("Please fill all fields");
     } else {
-      axios.post(`http://localhost:8080/api/auth/register`, { name, email, password }, { withCredentials: false })
+      axios.post(`http://localhost:8080/api/auth/register`, { name, email, password , isAdmin: false })
         .then((response) => {
           if (response.status === 201) {
             console.log(response.data);
             toast.success(`Successfully registered as ${response.data.user.name}`);
-            login(response.data.user); // Auto-login after signup
+            login(response.data.user); 
           }
         })
+        // .catch((error) => {
+        //   toast.error(error.response.data.message || "Signup failed");
+        //   console.log(error);
+        // });
         .catch((error) => {
-          toast.error(error.response.data.message || "Signup failed");
-          console.log(error);
+          console.log("Full error response:", error.response?.data);
+          toast.error(error.response?.data?.message || "Signup failed");
         });
+        
     }
   };
 
